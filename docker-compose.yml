@@ -71,10 +71,13 @@ services:
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.0
-    command: start-dev
+    command: start-dev --import-realm
     environment:
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm.json
     ports:
       - "${KEYCLOAK_PORT:-8181}:8080"
 
@@ -82,3 +85,4 @@ volumes:
   pg_ingestion:
   pg_analytics:
   minio_data:
+  keycloak_data:
