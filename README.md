@@ -4,7 +4,7 @@ Multi-tenant SaaS platform where freelancers and small businesses upload invoice
 
 Built as an event-driven microservices system to explore async processing, the transactional outbox pattern, and multi-tenancy end-to-end.
 
-> **Status:** 🚧 Phase 0 — Foundation (see [NOTES.md](NOTES.md) for the live decisions log and progress)
+> **Status:** 🚧 In-Progress
 
 ## Architecture (target)
 
@@ -49,7 +49,7 @@ Built as an event-driven microservices system to explore async processing, the t
 ## Getting Started
 
 ```bash
-git clone https://github.com/<your-username>/invoice-forge.git
+git clone https://github.com/EssghaierJacem/invoice-forge.git
 cd invoice-forge
 docker compose up -d      # infra: postgres x2, rabbitmq, minio, redis, keycloak
 ```
