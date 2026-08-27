@@ -1,0 +1,29 @@
+server:
+  port: ${INGESTION_PORT:8082}
+
+spring:
+  application:
+    name: ingestion-service
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_INGESTION_HOST:localhost}:${POSTGRES_INGESTION_PORT:5433}/ingestion
+    username: ${POSTGRES_USER:forge}
+    password: ${POSTGRES_PASSWORD:forge}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
