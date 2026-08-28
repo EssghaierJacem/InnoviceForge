@@ -24,6 +24,10 @@ spring:
     port: ${RABBITMQ_PORT:5672}
   flyway:
     enabled: true
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
 management:
   endpoints:
@@ -44,3 +48,6 @@ storage:
 
 upload:
   max-size-bytes: 10485760
+
+outbox:
+  publish-interval-ms: 2000
