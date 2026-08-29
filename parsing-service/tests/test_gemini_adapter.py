@@ -20,7 +20,7 @@ VALID_PAYLOAD = {
 
 
 def _adapter() -> GeminiExtractionAdapter:
-    return GeminiExtractionAdapter(api_key="fake-key-for-testing", model="gemini-2.5-flash")
+    return GeminiExtractionAdapter(api_key="fake-key-for-testing", model="gemini-3.5-flash-lite")
 
 
 def _mock_response(text: str) -> MagicMock:

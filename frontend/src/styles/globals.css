@@ -1,0 +1,250 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
+@import "@fontsource/space-grotesk/500.css";
+@import "@fontsource/space-grotesk/600.css";
+@import "@fontsource/space-grotesk/700.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+  Design tokens — source of truth. Everything below (the shadcn semantic
+  aliases and the Tailwind @theme mappings) references these, never a
+  hardcoded hex value.
+*/
+:root {
+  --color-primary: #123b2d;
+  --color-primary-hover: #0d2e22;
+  --color-primary-foreground: #c9f26c;
+  --color-on-dark: #f2eee1;
+  --color-background: #f5f1e8;
+  --color-surface: #ffffff;
+  --color-text-primary: #131417;
+  --color-text-secondary: #5b5f66;
+  --color-border: #e5e4e1;
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+  --color-danger: #dc2626;
+
+  /* accent card backgrounds for the Key Benefits section */
+  --color-card-accent-1: #123b2d;
+  --color-card-accent-1-foreground: #c9f26c;
+  --color-card-accent-2: #ded4f7;
+  --color-card-accent-2-foreground: #123b2d;
+  --color-card-accent-3: #d4f0a8;
+  --color-card-accent-3-foreground: #123b2d;
+
+  /* shadcn semantic slots, wired to the tokens above */
+  --background: var(--color-background);
+  --foreground: var(--color-text-primary);
+  --card: var(--color-surface);
+  --card-foreground: var(--color-text-primary);
+  --popover: var(--color-surface);
+  --popover-foreground: var(--color-text-primary);
+  --primary: var(--color-primary);
+  --primary-foreground: var(--color-primary-foreground);
+  --secondary: var(--color-surface);
+  --secondary-foreground: var(--color-text-primary);
+  --muted: var(--color-surface);
+  --muted-foreground: var(--color-text-secondary);
+  --accent: var(--color-surface);
+  --accent-foreground: var(--color-text-primary);
+  --destructive: var(--color-danger);
+  --border: var(--color-border);
+  --input: var(--color-border);
+  --ring: var(--color-primary);
+  --radius: 0.625rem;
+}
+
+.dark {
+  --color-primary: #1a5240;
+  --color-primary-hover: #123f30;
+  --color-primary-foreground: #c9f26c;
+  --color-on-dark: #f2eee1;
+  --color-background: #131417;
+  --color-surface: #1b1d21;
+  --color-text-primary: #fafaf9;
+  --color-text-secondary: #9ca0a8;
+  --color-border: #2a2c30;
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+  --color-danger: #dc2626;
+
+  --color-card-accent-1: #1a5240;
+  --color-card-accent-1-foreground: #c9f26c;
+  --color-card-accent-2: #ded4f7;
+  --color-card-accent-2-foreground: #123b2d;
+  --color-card-accent-3: #d4f0a8;
+  --color-card-accent-3-foreground: #123b2d;
+
+  --background: var(--color-background);
+  --foreground: var(--color-text-primary);
+  --card: var(--color-surface);
+  --card-foreground: var(--color-text-primary);
+  --popover: var(--color-surface);
+  --popover-foreground: var(--color-text-primary);
+  --primary: var(--color-primary);
+  --primary-foreground: var(--color-primary-foreground);
+  --secondary: var(--color-surface);
+  --secondary-foreground: var(--color-text-primary);
+  --muted: var(--color-surface);
+  --muted-foreground: var(--color-text-secondary);
+  --accent: var(--color-surface);
+  --accent-foreground: var(--color-text-primary);
+  --destructive: var(--color-danger);
+  --border: var(--color-border);
+  --input: var(--color-border);
+  --ring: var(--color-primary);
+}
+
+@theme inline {
+  /* fonts */
+  --font-heading: "Space Grotesk", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-sans: var(--font-body);
+
+  /* type scale — defined once, not ad-hoc per component */
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base: 1rem;
+  --text-base--line-height: 1.5rem;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.75rem;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.75rem;
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: 2rem;
+  --text-3xl: 1.875rem;
+  --text-3xl--line-height: 2.25rem;
+
+  /* our design tokens, exposed directly as Tailwind utilities
+     (bg-primary, text-secondary, border-border, bg-surface, ...) */
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--color-primary-hover);
+  --color-on-dark: var(--color-on-dark);
+  --color-background: var(--background);
+  --color-surface: var(--card);
+  --color-text-primary: var(--foreground);
+  --color-text-secondary: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-danger: var(--color-danger);
+
+  /* Key Benefits accent card tokens (bg-card-accent-1, text-card-accent-1-foreground, ...) */
+  --color-card-accent-1: var(--color-card-accent-1);
+  --color-card-accent-1-foreground: var(--color-card-accent-1-foreground);
+  --color-card-accent-2: var(--color-card-accent-2);
+  --color-card-accent-2-foreground: var(--color-card-accent-2-foreground);
+  --color-card-accent-3: var(--color-card-accent-3);
+  --color-card-accent-3-foreground: var(--color-card-accent-3-foreground);
+
+  /* shadcn semantic slots, required by the generated ui components */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-body;
+    /*
+      Subtle grain: an inline SVG feTurbulence filter rendered as a tiled
+      background image. feComponentTransfer scales the noise's alpha down
+      to ~4% so it reads as textured paper rather than visible static.
+    */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.04'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 180px 180px;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-heading;
+  }
+}
+
+@keyframes processing-sweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(250%);
+  }
+}
+
+.animate-processing-sweep {
+  animation: processing-sweep 1.6s ease-in-out infinite;
+}
+
+@keyframes reveal-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+.scroll-reveal.is-visible {
+  animation: reveal-fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-reveal,
+  .scroll-reveal.is-visible {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+}
+
+@keyframes step-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in oklch, var(--color-primary), transparent 65%);
+  }
+  50% {
+    box-shadow: 0 0 0 8px color-mix(in oklch, var(--color-primary), transparent 85%);
+  }
+}
+
+.step-icon-active {
+  animation: step-glow 2.2s ease-in-out infinite;
+}

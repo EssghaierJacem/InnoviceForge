@@ -34,11 +34,20 @@ public class ExtractedInvoice {
     @Column(name = "vendor_name", length = 255)
     private String vendorName;
 
+    @Column(name = "contact_name", length = 255)
+    private String contactName;
+
     @Column(name = "invoice_number", length = 100)
     private String invoiceNumber;
 
+    @Column(name = "po_number", length = 100)
+    private String poNumber;
+
     @Column(name = "issue_date")
     private LocalDate issueDate;
+
+    @Column(name = "due_date")
+    private LocalDate dueDate;
 
     @Column(name = "currency", columnDefinition = "bpchar")
     private String currency;
@@ -46,8 +55,17 @@ public class ExtractedInvoice {
     @Column(name = "total_amount", precision = 12, scale = 2)
     private BigDecimal totalAmount;
 
+    @Column(name = "subtotal", precision = 12, scale = 2)
+    private BigDecimal subtotal;
+
     @Column(name = "tax_amount", precision = 12, scale = 2)
     private BigDecimal taxAmount;
+
+    @Column(name = "payment_terms", length = 100)
+    private String paymentTerms;
+
+    @Column(name = "payment_method", length = 100)
+    private String paymentMethod;
 
     @Column(name = "category", length = 50)
     private String category;
@@ -69,18 +87,26 @@ public class ExtractedInvoice {
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;
 
-    public ExtractedInvoice(UUID id, UUID invoiceId, String tenantId, String vendorName, String invoiceNumber,
-                             LocalDate issueDate, String currency, BigDecimal totalAmount, BigDecimal taxAmount,
-                             String category, String lineItems, BigDecimal confidenceScore, String status) {
+    public ExtractedInvoice(UUID id, UUID invoiceId, String tenantId, String vendorName, String contactName,
+                             String invoiceNumber, String poNumber, LocalDate issueDate, LocalDate dueDate,
+                             String currency, BigDecimal totalAmount, BigDecimal subtotal, BigDecimal taxAmount,
+                             String paymentTerms, String paymentMethod, String category, String lineItems,
+                             BigDecimal confidenceScore, String status) {
         this.id = id;
         this.invoiceId = invoiceId;
         this.tenantId = tenantId;
         this.vendorName = vendorName;
+        this.contactName = contactName;
         this.invoiceNumber = invoiceNumber;
+        this.poNumber = poNumber;
         this.issueDate = issueDate;
+        this.dueDate = dueDate;
         this.currency = currency;
         this.totalAmount = totalAmount;
+        this.subtotal = subtotal;
         this.taxAmount = taxAmount;
+        this.paymentTerms = paymentTerms;
+        this.paymentMethod = paymentMethod;
         this.category = category;
         this.lineItems = lineItems;
         this.confidenceScore = confidenceScore;

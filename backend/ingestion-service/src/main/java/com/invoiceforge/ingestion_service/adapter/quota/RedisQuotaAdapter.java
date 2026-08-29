@@ -10,8 +10,9 @@ import java.time.LocalDate;
 @Component
 public class RedisQuotaAdapter implements QuotaPort {
 
-    private static final int DAILY_LIMIT = 5;
-    private static final int ANONYMOUS_LIMIT = 3;
+    // TEMP (dev testing): bumped from 5/3 while actively testing the upload flow — revert before any real launch.
+    private static final int DAILY_LIMIT = 1000;
+    private static final int ANONYMOUS_LIMIT = 1000;
     private static final Duration COUNTER_TTL = Duration.ofHours(26);
 
     private final StringRedisTemplate redisTemplate;

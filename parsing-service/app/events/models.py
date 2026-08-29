@@ -28,11 +28,17 @@ class InvoiceParsed(BaseModel):
     tenant_id: str = Field(alias="tenantId")
     status: str
     vendor_name: str | None = Field(default=None, alias="vendorName")
+    contact_name: str | None = Field(default=None, alias="contactName")
     invoice_number: str | None = Field(default=None, alias="invoiceNumber")
+    po_number: str | None = Field(default=None, alias="poNumber")
     issue_date: date | None = Field(default=None, alias="issueDate")
+    due_date: date | None = Field(default=None, alias="dueDate")
     currency: str | None = None
     total_amount: float | None = Field(default=None, alias="totalAmount")
+    subtotal: float | None = None
     tax_amount: float | None = Field(default=None, alias="taxAmount")
+    payment_terms: str | None = Field(default=None, alias="paymentTerms")
+    payment_method: str | None = Field(default=None, alias="paymentMethod")
     line_items: list[LineItem] = Field(default_factory=list, alias="lineItems")
     category: str | None = None
     confidence_score: float = Field(alias="confidenceScore")
@@ -50,11 +56,17 @@ class InvoiceParsed(BaseModel):
             tenant_id=tenant_id,
             status=status,
             vendor_name=extraction.vendor_name,
+            contact_name=extraction.contact_name,
             invoice_number=extraction.invoice_number,
+            po_number=extraction.po_number,
             issue_date=extraction.issue_date,
+            due_date=extraction.due_date,
             currency=extraction.currency,
             total_amount=extraction.total_amount,
+            subtotal=extraction.subtotal,
             tax_amount=extraction.tax_amount,
+            payment_terms=extraction.payment_terms,
+            payment_method=extraction.payment_method,
             line_items=extraction.line_items,
             category=extraction.category,
             confidence_score=extraction.confidence_score,

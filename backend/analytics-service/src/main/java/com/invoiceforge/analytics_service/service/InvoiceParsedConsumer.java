@@ -49,11 +49,17 @@ public class InvoiceParsedConsumer {
                 message.invoiceId(),
                 message.tenantId(),
                 message.vendorName(),
+                message.contactName(),
                 message.invoiceNumber(),
-                parseIssueDate(message.issueDate()),
+                message.poNumber(),
+                parseDate(message.issueDate()),
+                parseDate(message.dueDate()),
                 message.currency(),
                 message.totalAmount(),
+                message.subtotal(),
                 message.taxAmount(),
+                message.paymentTerms(),
+                message.paymentMethod(),
                 message.category(),
                 toJson(message.lineItems()),
                 message.confidenceScore(),
@@ -61,8 +67,8 @@ public class InvoiceParsedConsumer {
         );
     }
 
-    private LocalDate parseIssueDate(String issueDate) {
-        return issueDate == null ? null : LocalDate.parse(issueDate);
+    private LocalDate parseDate(String date) {
+        return date == null ? null : LocalDate.parse(date);
     }
 
     private String toJson(List<Object> lineItems) {
