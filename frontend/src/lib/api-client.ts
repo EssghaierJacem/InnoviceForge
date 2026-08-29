@@ -20,6 +20,18 @@ function getAuthHeaders(): HeadersInit {
   return {}
 }
 
+async function extractErrorMessage(response: Response, path: string): Promise<string> {
+  try {
+    const body: unknown = await response.json()
+    if (body && typeof body === 'object' && 'error' in body && typeof body.error === 'string') {
+      return body.error
+    }
+  } catch {
+    // body wasn't JSON (or was empty) — fall through to the generic message
+  }
+  return `Request to ${path} failed with status ${response.status}`
+}
+
 async function request<TResponse>(path: string, init?: RequestInit): Promise<TResponse> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
@@ -30,7 +42,7 @@ async function request<TResponse>(path: string, init?: RequestInit): Promise<TRe
   })
 
   if (!response.ok) {
-    throw new ApiError(response.status, `Request to ${path} failed with status ${response.status}`)
+    throw new ApiError(response.status, await extractErrorMessage(response, path))
   }
 
   if (response.status === 204) {

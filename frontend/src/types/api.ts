@@ -53,3 +53,27 @@ export interface ExtractedInvoice {
   reviewedByUser: boolean
   createdAt: string
 }
+
+/**
+ * GET /api/v1/public/reports/invoices/{invoiceId} (analytics-service).
+ * Deliberately excludes id/invoiceId/tenantId/reviewedByUser/createdAt —
+ * see PublicExtractionResultDTO.java. lineItems is still the raw JSON
+ * string; parse it client-side before rendering.
+ */
+export interface PublicExtractionResultDTO {
+  vendorName: string | null
+  invoiceNumber: string | null
+  issueDate: string | null
+  currency: string | null
+  totalAmount: number | null
+  taxAmount: number | null
+  category: string | null
+  lineItems: string | null
+  confidenceScore: number | null
+  status: string
+}
+
+export const EXTRACTION_STATUS = {
+  EXTRACTED: 'EXTRACTED',
+  NEEDS_REVIEW: 'NEEDS_REVIEW',
+} as const
