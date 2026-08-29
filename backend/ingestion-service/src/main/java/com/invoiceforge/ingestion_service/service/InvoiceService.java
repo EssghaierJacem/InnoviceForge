@@ -1,10 +1,13 @@
 package com.invoiceforge.ingestion_service.service;
 
 import com.invoiceforge.ingestion_service.exception.DuplicateInvoiceException;
+import com.invoiceforge.ingestion_service.exception.QuotaExceededException;
 import com.invoiceforge.ingestion_service.exception.SizeCapExceededException;
 import com.invoiceforge.ingestion_service.exception.UnsupportedFileTypeException;
 import com.invoiceforge.ingestion_service.model.Invoice;
 import com.invoiceforge.ingestion_service.model.OutboxEvent;
+import com.invoiceforge.ingestion_service.model.TenantPlan;
+import com.invoiceforge.ingestion_service.port.QuotaPort;
 import com.invoiceforge.ingestion_service.port.StoragePort;
 import com.invoiceforge.ingestion_service.repository.InvoiceRepository;
 import com.invoiceforge.ingestion_service.repository.OutboxEventRepository;
@@ -39,6 +42,8 @@ public class InvoiceService {
     private final InvoiceRepository invoiceRepository;
     private final OutboxEventRepository outboxEventRepository;
     private final StoragePort storagePort;
+    private final QuotaPort quotaPort;
+    private final PlanService planService;
     private final ObjectMapper objectMapper;
     private final long maxSizeBytes;
 
@@ -46,18 +51,51 @@ public class InvoiceService {
             InvoiceRepository invoiceRepository,
             OutboxEventRepository outboxEventRepository,
             StoragePort storagePort,
+            QuotaPort quotaPort,
+            PlanService planService,
             ObjectMapper objectMapper,
             @Value("${upload.max-size-bytes}") long maxSizeBytes
     ) {
         this.invoiceRepository = invoiceRepository;
         this.outboxEventRepository = outboxEventRepository;
         this.storagePort = storagePort;
+        this.quotaPort = quotaPort;
+        this.planService = planService;
         this.objectMapper = objectMapper;
         this.maxSizeBytes = maxSizeBytes;
     }
 
     @Transactional
     public Invoice upload(byte[] content, String originalFilename, UUID userId, String tenantId) {
+        enforceDailyQuota(tenantId);
+        return performUpload(content, originalFilename, userId, tenantId);
+    }
+
+    @Transactional
+    public Invoice uploadAnonymous(String ipAddress, byte[] content, String originalFilename) {
+        enforceAnonymousQuota(ipAddress);
+        UUID userId = UUID.nameUUIDFromBytes(ipAddress.getBytes());
+        return performUpload(content, originalFilename, userId, "anon:" + ipAddress);
+    }
+
+    private void enforceDailyQuota(String tenantId) {
+        Optional.of(tenantId)
+                .filter(id -> planService.getPlan(id) != TenantPlan.Plan.PRO)
+                .filter(id -> !quotaPort.tryConsumeDailyQuota(id))
+                .ifPresent(id -> {
+                    throw new QuotaExceededException("Daily upload limit reached (5/day on Free plan)");
+                });
+    }
+
+    private void enforceAnonymousQuota(String ipAddress) {
+        Optional.of(ipAddress)
+                .filter(ip -> !quotaPort.tryConsumeAnonymousQuota(ip))
+                .ifPresent(ip -> {
+                    throw new QuotaExceededException("Daily anonymous upload limit reached");
+                });
+    }
+
+    private Invoice performUpload(byte[] content, String originalFilename, UUID userId, String tenantId) {
         validateSize(content);
         String mimeType = detectMimeType(content);
         String fileHash = validateNotDuplicate(sha256Hex(content), userId);
@@ -76,9 +114,11 @@ public class InvoiceService {
     }
 
     private void validateSize(byte[] content) {
-        if (content.length > maxSizeBytes) {
-            throw new SizeCapExceededException("File exceeds maximum allowed size of " + maxSizeBytes + " bytes");
-        }
+        Optional.of(content)
+                .filter(c -> c.length > maxSizeBytes)
+                .ifPresent(c -> {
+                    throw new SizeCapExceededException("File exceeds maximum allowed size of " + maxSizeBytes + " bytes");
+                });
     }
 
     private String validateNotDuplicate(String fileHash, UUID userId) {

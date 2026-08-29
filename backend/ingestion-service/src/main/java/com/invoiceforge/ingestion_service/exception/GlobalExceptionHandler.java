@@ -24,4 +24,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, String>> handleDuplicateInvoice(DuplicateInvoiceException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", ex.getMessage()));
     }
+
+    @ExceptionHandler(QuotaExceededException.class)
+    public ResponseEntity<Map<String, String>> handleQuotaExceeded(QuotaExceededException ex) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(Map.of("error", ex.getMessage()));
+    }
 }
