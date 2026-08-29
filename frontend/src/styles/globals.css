@@ -18,9 +18,11 @@
   hardcoded hex value.
 */
 :root {
-  --color-primary: #0f6e56;
-  --color-primary-hover: #0c5a46;
-  --color-background: #fafaf9;
+  --color-primary: #123b2d;
+  --color-primary-hover: #0d2e22;
+  --color-primary-foreground: #c9f26c;
+  --color-on-dark: #f2eee1;
+  --color-background: #f5f1e8;
   --color-surface: #ffffff;
   --color-text-primary: #131417;
   --color-text-secondary: #5b5f66;
@@ -28,6 +30,14 @@
   --color-success: #16a34a;
   --color-warning: #d97706;
   --color-danger: #dc2626;
+
+  /* accent card backgrounds for the Key Benefits section */
+  --color-card-accent-1: #123b2d;
+  --color-card-accent-1-foreground: #c9f26c;
+  --color-card-accent-2: #ded4f7;
+  --color-card-accent-2-foreground: #123b2d;
+  --color-card-accent-3: #d4f0a8;
+  --color-card-accent-3-foreground: #123b2d;
 
   /* shadcn semantic slots, wired to the tokens above */
   --background: var(--color-background);
@@ -37,7 +47,7 @@
   --popover: var(--color-surface);
   --popover-foreground: var(--color-text-primary);
   --primary: var(--color-primary);
-  --primary-foreground: #ffffff;
+  --primary-foreground: var(--color-primary-foreground);
   --secondary: var(--color-surface);
   --secondary-foreground: var(--color-text-primary);
   --muted: var(--color-surface);
@@ -52,8 +62,10 @@
 }
 
 .dark {
-  --color-primary: #17a98a;
-  --color-primary-hover: #129478;
+  --color-primary: #1a5240;
+  --color-primary-hover: #123f30;
+  --color-primary-foreground: #c9f26c;
+  --color-on-dark: #f2eee1;
   --color-background: #131417;
   --color-surface: #1b1d21;
   --color-text-primary: #fafaf9;
@@ -63,6 +75,13 @@
   --color-warning: #d97706;
   --color-danger: #dc2626;
 
+  --color-card-accent-1: #1a5240;
+  --color-card-accent-1-foreground: #c9f26c;
+  --color-card-accent-2: #ded4f7;
+  --color-card-accent-2-foreground: #123b2d;
+  --color-card-accent-3: #d4f0a8;
+  --color-card-accent-3-foreground: #123b2d;
+
   --background: var(--color-background);
   --foreground: var(--color-text-primary);
   --card: var(--color-surface);
@@ -70,7 +89,7 @@
   --popover: var(--color-surface);
   --popover-foreground: var(--color-text-primary);
   --primary: var(--color-primary);
-  --primary-foreground: #ffffff;
+  --primary-foreground: var(--color-primary-foreground);
   --secondary: var(--color-surface);
   --secondary-foreground: var(--color-text-primary);
   --muted: var(--color-surface);
@@ -107,6 +126,7 @@
      (bg-primary, text-secondary, border-border, bg-surface, ...) */
   --color-primary: var(--primary);
   --color-primary-hover: var(--color-primary-hover);
+  --color-on-dark: var(--color-on-dark);
   --color-background: var(--background);
   --color-surface: var(--card);
   --color-text-primary: var(--foreground);
@@ -115,6 +135,14 @@
   --color-success: var(--color-success);
   --color-warning: var(--color-warning);
   --color-danger: var(--color-danger);
+
+  /* Key Benefits accent card tokens (bg-card-accent-1, text-card-accent-1-foreground, ...) */
+  --color-card-accent-1: var(--color-card-accent-1);
+  --color-card-accent-1-foreground: var(--color-card-accent-1-foreground);
+  --color-card-accent-2: var(--color-card-accent-2);
+  --color-card-accent-2-foreground: var(--color-card-accent-2-foreground);
+  --color-card-accent-3: var(--color-card-accent-3);
+  --color-card-accent-3-foreground: var(--color-card-accent-3-foreground);
 
   /* shadcn semantic slots, required by the generated ui components */
   --color-background: var(--background);
@@ -146,6 +174,14 @@
   }
   body {
     @apply bg-background text-foreground font-body;
+    /*
+      Subtle grain: an inline SVG feTurbulence filter rendered as a tiled
+      background image. feComponentTransfer scales the noise's alpha down
+      to ~4% so it reads as textured paper rather than visible static.
+    */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.04'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 180px 180px;
   }
   h1,
   h2,
@@ -168,4 +204,47 @@
 
 .animate-processing-sweep {
   animation: processing-sweep 1.6s ease-in-out infinite;
+}
+
+@keyframes reveal-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+.scroll-reveal.is-visible {
+  animation: reveal-fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-reveal,
+  .scroll-reveal.is-visible {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+}
+
+@keyframes step-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in oklch, var(--color-primary), transparent 65%);
+  }
+  50% {
+    box-shadow: 0 0 0 8px color-mix(in oklch, var(--color-primary), transparent 85%);
+  }
+}
+
+.step-icon-active {
+  animation: step-glow 2.2s ease-in-out infinite;
 }

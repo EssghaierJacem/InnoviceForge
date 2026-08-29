@@ -41,11 +41,17 @@ export interface ExtractedInvoice {
   invoiceId: string
   tenantId: string
   vendorName: string | null
+  contactName: string | null
   invoiceNumber: string | null
+  poNumber: string | null
   issueDate: string | null
+  dueDate: string | null
   currency: string | null
   totalAmount: number | null
+  subtotal: number | null
   taxAmount: number | null
+  paymentTerms: string | null
+  paymentMethod: string | null
   category: string | null
   lineItems: string | null
   confidenceScore: number | null
@@ -62,11 +68,17 @@ export interface ExtractedInvoice {
  */
 export interface PublicExtractionResultDTO {
   vendorName: string | null
+  contactName: string | null
   invoiceNumber: string | null
+  poNumber: string | null
   issueDate: string | null
+  dueDate: string | null
   currency: string | null
   totalAmount: number | null
+  subtotal: number | null
   taxAmount: number | null
+  paymentTerms: string | null
+  paymentMethod: string | null
   category: string | null
   lineItems: string | null
   confidenceScore: number | null

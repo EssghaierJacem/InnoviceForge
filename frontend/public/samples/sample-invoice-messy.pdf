@@ -1,0 +1,44 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 4 0 R >> >> /MediaBox [0 0 612 792] /Contents 5 0 R >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+5 0 obj
+<< /Length 548 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 90 750 Tm (QUICKFIX PLUMBING & HEATING) Tj
+1 0 0 1 95 736 Tm (call/text 555-0148 - ask for Dave) Tj
+1 0 0 1 300 700 Tm (invoice \(kind of\) -- job #7) Tj
+1 0 0 1 90 660 Tm (for: Mrs. Alvarez, 12 Birch Ln) Tj
+1 0 0 1 90 636 Tm (date done: 3/9  -  paid by: check) Tj
+1 0 0 1 90 600 Tm (parts - misc fittings ......... 38) Tj
+1 0 0 1 90 584 Tm (new valve .................... 64) Tj
+1 0 0 1 90 568 Tm (labor - 2.5 hrs @ 70 ......... 175) Tj
+1 0 0 1 90 536 Tm (total owed ~ 277 \(rounded\)) Tj
+1 0 0 1 90 500 Tm (thx! - Dave) Tj
+ET
+endstream
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000000311 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+910
+%%EOF

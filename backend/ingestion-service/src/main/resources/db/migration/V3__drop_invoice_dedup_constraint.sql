@@ -1,0 +1,1 @@
+ALTER TABLE invoices DROP CONSTRAINT invoices_file_hash_user_id_key;

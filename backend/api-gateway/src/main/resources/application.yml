@@ -11,23 +11,25 @@ spring:
           issuer-uri: ${KEYCLOAK_ISSUER:http://localhost:8181/realms/invoiceforge}
   cloud:
     gateway:
-      routes:
-        - id: ingestion-service
-          uri: ${INGESTION_SERVICE_URL:http://localhost:8082}
-          predicates:
-            - Path=/api/v1/invoices/**
-        - id: analytics-service
-          uri: ${ANALYTICS_SERVICE_URL:http://localhost:8083}
-          predicates:
-            - Path=/api/v1/reports/**
-        - id: ingestion-public
-          uri: ${INGESTION_SERVICE_URL:http://localhost:8082}
-          predicates:
-            - Path=/api/v1/public/invoices/**
-        - id: analytics-public
-          uri: ${ANALYTICS_SERVICE_URL:http://localhost:8083}
-          predicates:
-            - Path=/api/v1/public/reports/**
+      server:
+        webflux:
+          routes:
+            - id: ingestion-service
+              uri: ${INGESTION_SERVICE_URL:http://localhost:8082}
+              predicates:
+                - Path=/api/v1/invoices/**
+            - id: analytics-service
+              uri: ${ANALYTICS_SERVICE_URL:http://localhost:8083}
+              predicates:
+                - Path=/api/v1/reports/**
+            - id: ingestion-public
+              uri: ${INGESTION_SERVICE_URL:http://localhost:8082}
+              predicates:
+                - Path=/api/v1/public/invoices/**
+            - id: analytics-public
+              uri: ${ANALYTICS_SERVICE_URL:http://localhost:8083}
+              predicates:
+                - Path=/api/v1/public/reports/**
 
 management:
   endpoints:

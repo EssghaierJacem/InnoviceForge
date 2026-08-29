@@ -1,6 +1,5 @@
 package com.invoiceforge.ingestion_service.service;
 
-import com.invoiceforge.ingestion_service.exception.DuplicateInvoiceException;
 import com.invoiceforge.ingestion_service.exception.QuotaExceededException;
 import com.invoiceforge.ingestion_service.exception.SizeCapExceededException;
 import com.invoiceforge.ingestion_service.exception.UnsupportedFileTypeException;
@@ -98,7 +97,8 @@ public class InvoiceService {
     private Invoice performUpload(byte[] content, String originalFilename, UUID userId, String tenantId) {
         validateSize(content);
         String mimeType = detectMimeType(content);
-        String fileHash = validateNotDuplicate(sha256Hex(content), userId);
+        String fileHash = sha256Hex(content);
+        String resolvedFilename = disambiguateFilename(originalFilename, fileHash, userId);
 
         UUID invoiceId = UUID.randomUUID();
         String fileKey = buildFileKey(tenantId, userId, invoiceId);
@@ -106,7 +106,7 @@ public class InvoiceService {
         storagePort.store(fileKey, new ByteArrayInputStream(content), content.length, mimeType);
 
         Invoice invoice = invoiceRepository.save(
-                buildInvoice(invoiceId, tenantId, userId, fileKey, fileHash, originalFilename, mimeType, content.length)
+                buildInvoice(invoiceId, tenantId, userId, fileKey, fileHash, resolvedFilename, mimeType, content.length)
         );
         outboxEventRepository.save(buildOutboxEvent(invoiceId, tenantId, userId, fileKey));
 
@@ -121,10 +121,16 @@ public class InvoiceService {
                 });
     }
 
-    private String validateNotDuplicate(String fileHash, UUID userId) {
-        return Optional.of(fileHash)
-                .filter(hash -> !invoiceRepository.existsByFileHashAndUserId(hash, userId))
-                .orElseThrow(() -> new DuplicateInvoiceException("An identical file has already been uploaded by this user"));
+    private String disambiguateFilename(String originalFilename, String fileHash, UUID userId) {
+        long duplicateCount = invoiceRepository.countByFileHashAndUserId(fileHash, userId);
+        return duplicateCount == 0 ? originalFilename : appendCounter(originalFilename, duplicateCount);
+    }
+
+    private String appendCounter(String filename, long counter) {
+        int dotIndex = filename.lastIndexOf('.');
+        return dotIndex == -1
+                ? filename + " (" + counter + ")"
+                : filename.substring(0, dotIndex) + " (" + counter + ")" + filename.substring(dotIndex);
     }
 
     private String detectMimeType(byte[] content) {

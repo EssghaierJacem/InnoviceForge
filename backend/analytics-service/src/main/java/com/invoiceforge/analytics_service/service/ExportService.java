@@ -23,8 +23,9 @@ import java.util.List;
 public class ExportService {
 
     private static final String[] HEADERS = {
-            "vendor_name", "invoice_number", "issue_date", "currency", "total_amount",
-            "tax_amount", "category", "confidence_score", "status", "created_at"
+            "vendor_name", "contact_name", "invoice_number", "po_number", "issue_date", "due_date",
+            "currency", "total_amount", "subtotal", "tax_amount", "payment_terms", "payment_method",
+            "category", "confidence_score", "status", "created_at"
     };
 
     private static final int ROW_ACCESS_WINDOW_SIZE = 100;
@@ -76,15 +77,21 @@ public class ExportService {
 
     private void writeDataRow(Row row, ExtractedInvoice invoice, CellStyle dateStyle, CellStyle dateTimeStyle) {
         setStringCell(row, 0, invoice.getVendorName());
-        setStringCell(row, 1, invoice.getInvoiceNumber());
-        setDateCell(row, 2, invoice.getIssueDate(), dateStyle);
-        setStringCell(row, 3, invoice.getCurrency());
-        setNumericCell(row, 4, invoice.getTotalAmount());
-        setNumericCell(row, 5, invoice.getTaxAmount());
-        setStringCell(row, 6, invoice.getCategory());
-        setNumericCell(row, 7, invoice.getConfidenceScore());
-        setStringCell(row, 8, invoice.getStatus());
-        setDateTimeCell(row, 9, invoice.getCreatedAt(), dateTimeStyle);
+        setStringCell(row, 1, invoice.getContactName());
+        setStringCell(row, 2, invoice.getInvoiceNumber());
+        setStringCell(row, 3, invoice.getPoNumber());
+        setDateCell(row, 4, invoice.getIssueDate(), dateStyle);
+        setDateCell(row, 5, invoice.getDueDate(), dateStyle);
+        setStringCell(row, 6, invoice.getCurrency());
+        setNumericCell(row, 7, invoice.getTotalAmount());
+        setNumericCell(row, 8, invoice.getSubtotal());
+        setNumericCell(row, 9, invoice.getTaxAmount());
+        setStringCell(row, 10, invoice.getPaymentTerms());
+        setStringCell(row, 11, invoice.getPaymentMethod());
+        setStringCell(row, 12, invoice.getCategory());
+        setNumericCell(row, 13, invoice.getConfidenceScore());
+        setStringCell(row, 14, invoice.getStatus());
+        setDateTimeCell(row, 15, invoice.getCreatedAt(), dateTimeStyle);
     }
 
     private void setStringCell(Row row, int column, String value) {
@@ -120,11 +127,17 @@ public class ExportService {
     private Object[] toCsvRowValues(ExtractedInvoice invoice) {
         return new Object[]{
                 invoice.getVendorName(),
+                invoice.getContactName(),
                 invoice.getInvoiceNumber(),
+                invoice.getPoNumber(),
                 invoice.getIssueDate(),
+                invoice.getDueDate(),
                 invoice.getCurrency(),
                 invoice.getTotalAmount(),
+                invoice.getSubtotal(),
                 invoice.getTaxAmount(),
+                invoice.getPaymentTerms(),
+                invoice.getPaymentMethod(),
                 invoice.getCategory(),
                 invoice.getConfidenceScore(),
                 invoice.getStatus(),

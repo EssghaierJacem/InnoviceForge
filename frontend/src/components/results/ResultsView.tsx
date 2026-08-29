@@ -5,6 +5,7 @@ import { InvoiceDetails } from '@/components/results/InvoiceDetails'
 import { LineItemsTable } from '@/components/results/LineItemsTable'
 import { NeedsReviewBanner } from '@/components/results/NeedsReviewBanner'
 import { downloadResultAsCsv } from '@/lib/csv-export'
+import { downloadResultAsXlsx } from '@/lib/xlsx-export'
 import { EXTRACTION_STATUS, type PublicExtractionResultDTO } from '@/types/api'
 
 interface ResultsViewProps {
@@ -44,6 +45,9 @@ export function ResultsView({ result, onProcessAnother }: ResultsViewProps) {
         <Button onClick={onProcessAnother}>Process another invoice</Button>
         <Button variant="outline" onClick={() => downloadResultAsCsv(result)}>
           Export as CSV
+        </Button>
+        <Button variant="outline" onClick={() => downloadResultAsXlsx(result)}>
+          Export as Excel
         </Button>
       </div>
     </div>

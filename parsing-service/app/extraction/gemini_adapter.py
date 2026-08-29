@@ -10,12 +10,17 @@ from app.extraction.port import ExtractionPort
 EXTRACTION_PROMPT = (
     "You are an invoice data extraction system. Read the attached document "
     "and extract these fields as structured JSON: vendor_name, "
-    "invoice_number, issue_date (ISO 8601, YYYY-MM-DD), currency (ISO 4217 "
-    "code), total_amount, tax_amount, line_items (each with description, "
-    "quantity, unit_price, amount), and category (a short free-text "
-    "classification of what was purchased, e.g. 'software', 'travel', "
-    "'office supplies'). If a field is not present in the document, return "
-    "null for it rather than guessing."
+    "contact_name (a named person associated with the invoice, e.g. an "
+    "account manager or billing contact), invoice_number, po_number "
+    "(purchase order number), issue_date (ISO 8601, YYYY-MM-DD), due_date "
+    "(ISO 8601, YYYY-MM-DD), currency (ISO 4217 code), total_amount, "
+    "subtotal (the pre-tax amount, if stated separately from total_amount), "
+    "tax_amount, payment_terms (e.g. 'Net 30', 'Due on receipt'), "
+    "payment_method (e.g. 'Bank transfer', 'Credit card'), line_items (each "
+    "with description, quantity, unit_price, amount), and category (a "
+    "short free-text classification of what was purchased, e.g. "
+    "'software', 'travel', 'office supplies'). If a field is not present "
+    "in the document, return null for it rather than guessing."
 )
 
 
