@@ -1,0 +1,50 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /Resources << /Font << /F1 4 0 R >> >> /MediaBox [0 0 612 792] /Contents 5 0 R >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+5 0 obj
+<< /Length 980 >>
+stream
+BT
+/F1 11 Tf
+1 0 0 1 72 740 Tm (Acme Supply Co.) Tj
+1 0 0 1 72 724 Tm (482 Harbor Road, Portland, OR 97201) Tj
+1 0 0 1 400 740 Tm (INVOICE) Tj
+1 0 0 1 400 724 Tm (Invoice #: INV-10432) Tj
+1 0 0 1 400 710 Tm (Date: 2026-07-14) Tj
+1 0 0 1 400 696 Tm (Due: 2026-08-13) Tj
+1 0 0 1 72 680 Tm (Bill To: Northgate Logistics LLC) Tj
+1 0 0 1 72 640 Tm (Description                Qty   Unit Price   Amount) Tj
+1 0 0 1 72 624 Tm (Pallet racking - 8ft         12      45.00       540.00) Tj
+1 0 0 1 72 608 Tm (Freight surcharge             1      75.00        75.00) Tj
+1 0 0 1 72 592 Tm (Installation labor \(hrs\)      6      60.00       360.00) Tj
+1 0 0 1 72 556 Tm (Subtotal:                                        975.00) Tj
+1 0 0 1 72 540 Tm (Tax \(8.5%\):                                        82.88) Tj
+1 0 0 1 72 524 Tm (Total:                                          1057.88) Tj
+1 0 0 1 72 488 Tm (Payment terms: Net 30) Tj
+1 0 0 1 72 472 Tm (Payment method: Bank transfer) Tj
+ET
+endstream
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000241 00000 n 
+0000000311 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+1342
+%%EOF

@@ -12,4 +12,6 @@ public interface ExtractedInvoiceRepository extends JpaRepository<ExtractedInvoi
     List<ExtractedInvoice> findByTenantId(String tenantId);
 
     Optional<ExtractedInvoice> findByIdAndTenantId(UUID id, String tenantId);
+
+    Optional<ExtractedInvoice> findByInvoiceId(UUID invoiceId);
 }

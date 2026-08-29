@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public interface InvoiceRepository extends JpaRepository<Invoice, UUID> {
 
-    boolean existsByFileHashAndUserId(String fileHash, UUID userId);
+    long countByFileHashAndUserId(String fileHash, UUID userId);
 
     Optional<Invoice> findByIdAndTenantId(UUID id, String tenantId);
 }

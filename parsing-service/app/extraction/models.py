@@ -14,11 +14,17 @@ class LineItem(BaseModel):
 
 class GeminiRawExtraction(BaseModel):
     vendor_name: str | None = None
+    contact_name: str | None = None
     invoice_number: str | None = None
+    po_number: str | None = None
     issue_date: date | None = None
+    due_date: date | None = None
     currency: str | None = None
     total_amount: float | None = None
+    subtotal: float | None = None
     tax_amount: float | None = None
+    payment_terms: str | None = None
+    payment_method: str | None = None
     line_items: list[LineItem] = Field(default_factory=list)
     category: str | None = None
 
