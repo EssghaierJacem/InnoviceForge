@@ -328,7 +328,7 @@
       "id": "6f7f6512-b39c-49b9-898d-f4ac3f1b2b2b",
       "clientId": "backend-admin",
       "name": "client-backend-admin",
-      "description": "Confidential service-account client used by ingestion-service to call the Keycloak Admin REST API (tenant provisioning on self-registration). fullScopeAllowed is false, so after importing this realm, grant it the realm-management \"manage-users\" AND \"view-users\" client roles from the Keycloak admin console under BOTH Clients > backend-admin > Service account roles AND Clients > backend-admin > Client scopes > realm-management > Scope — the service-account role assignment alone is not enough to put the roles on the issued token when fullScopeAllowed is off, and neither mapping is captured by a realm-only export.",
+      "description": "Service-account client for ingestion-service's Keycloak Admin API calls (tenant provisioning). fullScopeAllowed=false: grant realm-management manage-users+view-users via BOTH Service account roles AND Client scopes > realm-management. See .env.example.",
       "rootUrl": "",
       "adminUrl": "",
       "baseUrl": "",
