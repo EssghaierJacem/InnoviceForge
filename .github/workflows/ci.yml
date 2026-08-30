@@ -27,6 +27,10 @@ jobs:
       - name: Start infra
         run: docker compose up -d --wait postgres-ingestion postgres-analytics rabbitmq redis minio keycloak
 
+      - name: Dump infra logs
+        if: failure()
+        run: docker compose logs --no-color
+
       - name: mvn clean verify
         working-directory: backend
         run: mvn -B clean verify
