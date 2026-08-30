@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Button } from '@/components/ui/button'
+import { AuthControls } from '@/components/auth/AuthControls'
 import { useScrolled } from '@/hooks/useScrolled'
 import { cn } from '@/lib/utils'
 
@@ -34,9 +34,7 @@ export function Header() {
           </nav>
         </div>
 
-        <Button asChild className="rounded-full">
-          <a href="/#top">Try it free</a>
-        </Button>
+        <AuthControls />
       </div>
     </header>
   )

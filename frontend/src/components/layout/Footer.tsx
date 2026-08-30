@@ -3,12 +3,12 @@ import { Link } from 'react-router-dom'
 const PRODUCT_LINKS = [
   { label: 'How it works', href: '/#top' },
   { label: 'Pricing', href: '/#pricing' },
-  { label: 'FAQ', href: '/#top' },
+  { label: 'FAQ', href: '/#faq' },
 ] as const
 
 const COMPANY_LINKS = [
   { label: 'About', href: '/about' },
-  { label: 'Contact', href: 'mailto:hello@invoiceforge.app' },
+  { label: 'Contact', href: '/contact' },
 ] as const
 
 const LEGAL_LINKS = [

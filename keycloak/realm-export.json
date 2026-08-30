@@ -1,6 +1,7 @@
 {
   "id": "798cd67d-1bd9-4dcb-a0e2-7c73dc7f0b30",
   "realm": "invoiceforge",
+  "loginTheme": "invoiceforge",
   "notBefore": 0,
   "defaultSignatureAlgorithm": "RS256",
   "revokeRefreshToken": false,
@@ -27,7 +28,7 @@
   "oauth2DevicePollingInterval": 5,
   "enabled": true,
   "sslRequired": "external",
-  "registrationAllowed": false,
+  "registrationAllowed": true,
   "registrationEmailAsUsername": false,
   "rememberMe": false,
   "verifyEmail": false,
@@ -324,6 +325,56 @@
       ]
     },
     {
+      "id": "6f7f6512-b39c-49b9-898d-f4ac3f1b2b2b",
+      "clientId": "backend-admin",
+      "name": "client-backend-admin",
+      "description": "Confidential service-account client used by ingestion-service to call the Keycloak Admin REST API (tenant provisioning on self-registration). fullScopeAllowed is false, so after importing this realm, grant it the realm-management \"manage-users\" AND \"view-users\" client roles from the Keycloak admin console under BOTH Clients > backend-admin > Service account roles AND Clients > backend-admin > Client scopes > realm-management > Scope — the service-account role assignment alone is not enough to put the roles on the issued token when fullScopeAllowed is off, and neither mapping is captured by a realm-only export.",
+      "rootUrl": "",
+      "adminUrl": "",
+      "baseUrl": "",
+      "surrogateAuthRequired": false,
+      "enabled": true,
+      "alwaysDisplayInConsole": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "**********",
+      "redirectUris": [],
+      "webOrigins": [],
+      "notBefore": 0,
+      "bearerOnly": false,
+      "consentRequired": false,
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "publicClient": false,
+      "frontchannelLogout": false,
+      "protocol": "openid-connect",
+      "attributes": {
+        "realm_client": "false",
+        "backchannel.logout.session.required": "true",
+        "backchannel.logout.revoke.offline.tokens": "false"
+      },
+      "authenticationFlowBindingOverrides": {},
+      "fullScopeAllowed": false,
+      "nodeReRegistrationTimeout": -1,
+      "defaultClientScopes": [
+        "web-origins",
+        "tenant_id",
+        "acr",
+        "roles",
+        "profile",
+        "basic",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "offline_access",
+        "organization",
+        "microprofile-jwt"
+      ]
+    },
+    {
       "id": "a1533d4e-2412-4333-b284-3eff791546b5",
       "clientId": "broker",
       "name": "${client_broker}",
@@ -381,7 +432,7 @@
         "http://localhost:5173/*"
       ],
       "webOrigins": [
-        " http://localhost:5173"
+        "http://localhost:5173"
       ],
       "notBefore": 0,
       "bearerOnly": false,
@@ -2194,7 +2245,11 @@
     "cibaAuthRequestedUserHint": "login_hint",
     "oauth2DeviceCodeLifespan": "600",
     "oauth2DevicePollingInterval": "5",
+    "clientOfflineSessionMaxLifespan": "0",
+    "clientSessionIdleTimeout": "0",
     "parRequestUriLifespan": "60",
+    "clientSessionMaxLifespan": "0",
+    "clientOfflineSessionIdleTimeout": "0",
     "cibaInterval": "5",
     "realmReusableOtpCode": "false"
   },

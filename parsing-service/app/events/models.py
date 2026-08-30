@@ -7,9 +7,11 @@ from app.extraction.models import ExtractionResult, LineItem
 
 INVOICE_UPLOADED_TYPE = "INVOICE_UPLOADED"
 INVOICE_PARSED_TYPE = "INVOICE_PARSED"
+INVOICE_FAILED_TYPE = "INVOICE_FAILED"
 
 STATUS_EXTRACTED = "EXTRACTED"
 STATUS_NEEDS_REVIEW = "NEEDS_REVIEW"
+STATUS_FAILED = "FAILED"
 
 
 class InvoiceUploaded(BaseModel):
@@ -71,3 +73,20 @@ class InvoiceParsed(BaseModel):
             category=extraction.category,
             confidence_score=extraction.confidence_score,
         )
+
+
+class InvoiceFailed(BaseModel):
+    """
+    Published when an invoice exhausts the retry ladder (see consumer.py) and
+    is routed to invoice.parse.dlq for good. The raw AMQP message still lands
+    in the DLQ for replay/inspection, but nothing was consuming that queue or
+    surfacing the failure anywhere a user or operator would see it — this
+    lightweight domain event is what analytics-service turns into a visible
+    FAILED row instead of the invoice just silently never appearing.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    invoice_id: UUID = Field(alias="invoiceId")
+    tenant_id: str = Field(alias="tenantId")
+    reason: str

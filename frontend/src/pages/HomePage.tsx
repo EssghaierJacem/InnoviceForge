@@ -1,4 +1,5 @@
 import { CheckCircle2, ShieldCheck } from 'lucide-react'
+import { useAuth } from 'react-oidc-context'
 import { BenefitsSection } from '@/components/marketing/BenefitsSection'
 import { ComparisonSection } from '@/components/marketing/ComparisonSection'
 import { FaqSection } from '@/components/marketing/FaqSection'
@@ -12,10 +13,17 @@ import { SampleInvoices } from '@/components/upload/SampleInvoices'
 import { StatusMessage } from '@/components/upload/StatusMessage'
 import { UploadZone } from '@/components/upload/UploadZone'
 import { ResultsView } from '@/components/results/ResultsView'
-import { useUploadPolling } from '@/hooks/useUploadPolling'
+import { AUTHENTICATED_UPLOAD_CONFIG, PUBLIC_UPLOAD_CONFIG, useUploadPolling } from '@/hooks/useUploadPolling'
+import type { PublicExtractionResultDTO } from '@/types/api'
 
 export function HomePage() {
-  const { state, upload, reset } = useUploadPolling()
+  const auth = useAuth()
+  // Logged-in visitors upload through the same authenticated endpoint the
+  // dashboard uses, whichever page they upload from — otherwise the file
+  // lands under the anonymous tenant and can never show up in their own
+  // invoice history.
+  const uploadConfig = auth.isAuthenticated ? AUTHENTICATED_UPLOAD_CONFIG : PUBLIC_UPLOAD_CONFIG
+  const { state, upload, loadSample, reset } = useUploadPolling<PublicExtractionResultDTO>(uploadConfig)
   const showUploadZone = state.status === 'idle' || state.status === 'quota-exceeded'
 
   return (
@@ -59,7 +67,7 @@ export function HomePage() {
                 don't currently delete anonymous uploads automatically.
               </p>
 
-              <SampleInvoices onSampleSelected={upload} />
+              <SampleInvoices onSampleSelected={loadSample} />
             </>
           )}
 
@@ -79,7 +87,11 @@ export function HomePage() {
 
           {state.status === 'success' && <ResultsView result={state.result} onProcessAnother={reset} />}
 
-          <QuotaExceededModal open={state.status === 'quota-exceeded'} onDismiss={reset} />
+          <QuotaExceededModal
+            open={state.status === 'quota-exceeded'}
+            onDismiss={reset}
+            variant={auth.isAuthenticated ? 'authenticated' : 'anonymous'}
+          />
         </div>
       </div>
 

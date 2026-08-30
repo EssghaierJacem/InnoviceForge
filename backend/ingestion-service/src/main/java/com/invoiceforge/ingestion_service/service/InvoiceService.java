@@ -10,6 +10,7 @@ import com.invoiceforge.ingestion_service.port.QuotaPort;
 import com.invoiceforge.ingestion_service.port.StoragePort;
 import com.invoiceforge.ingestion_service.repository.InvoiceRepository;
 import com.invoiceforge.ingestion_service.repository.OutboxEventRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +27,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class InvoiceService {
 
     private static final byte[] PDF_MAGIC = {0x25, 0x50, 0x44, 0x46};
@@ -109,6 +111,10 @@ public class InvoiceService {
                 buildInvoice(invoiceId, tenantId, userId, fileKey, fileHash, resolvedFilename, mimeType, content.length)
         );
         outboxEventRepository.save(buildOutboxEvent(invoiceId, tenantId, userId, fileKey));
+        // invoiceId is the correlation key that threads through the outbox
+        // publish, RabbitMQ, parsing-service, and analytics-service's own
+        // logs — this is the one line on the ingestion side that anchors it.
+        log.info("[invoice_id={}] uploaded ({} bytes), outbox event queued for publish", invoiceId, content.length);
 
         return invoice;
     }

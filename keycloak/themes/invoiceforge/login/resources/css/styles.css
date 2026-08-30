@@ -1,0 +1,202 @@
+/*
+  InvoiceForge Keycloak theme.
+
+  Font choice: Google Fonts CDN via @import, not self-hosted. The React app
+  self-hosts these same families via @fontsource, but this is a separate
+  container/build with no npm pipeline of its own — pulling from Google's
+  CDN keeps this theme a single self-contained CSS file rather than needing
+  font binaries copied into resources/. Fine for local dev; if this were a
+  real deployment on a network that blocks external font requests, that
+  would be the reason to switch to self-hosted files here too.
+*/
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@600;700&display=swap');
+
+/*
+  This page is light-only by design (it matches the React app, which
+  doesn't auto-switch either) — the built-in template.ftl toggles a
+  .pf-v5-theme-dark class on <html> straight off prefers-color-scheme,
+  and PatternFly's dark variant hardcodes several colors (rather than
+  deriving them from the tokens below), at higher specificity than a
+  plain :root rule. The !importants here are deliberately blunt: rather
+  than chase each dark-mode selector individually, they force our accent
+  color to win regardless of which branch PatternFly took.
+*/
+:root,
+html.pf-v5-theme-dark {
+  /* PatternFly v5's own global token — this is what actually drives the
+     focus underline color on .pf-v5-c-form-control, plus various other
+     component defaults. Overriding it here (rather than fighting each
+     component's ::after individually) is the idiomatic way to theme
+     PatternFly v5. */
+  --pf-v5-global--primary-color--100: #123b2d !important;
+  --pf-v5-global--primary-color--200: #0d2e22 !important;
+  /* Separately drives the form-control focus underline — PatternFly uses
+     this "active accent" token rather than primary-color for that. */
+  --pf-v5-global--active-color--100: #123b2d !important;
+  --pf-v5-global--active-color--200: #0d2e22 !important;
+
+  --if-primary: #123b2d;
+  --if-primary-hover: #0d2e22;
+  --if-on-dark: #f2eee1;
+  --if-background: #f5f1e8;
+  --if-surface: #ffffff;
+  --if-text-primary: #131417;
+  --if-text-secondary: #5b5f66;
+  --if-border: #e5e4e1;
+  --if-font-heading: 'Space Grotesk', sans-serif;
+  --if-font-body: 'Inter', sans-serif;
+}
+
+/* Page background — replaces the default keycloak-bg.png triangle pattern. */
+body#keycloak-bg {
+  background: var(--if-background);
+  font-family: var(--if-font-body);
+}
+
+.pf-v5-c-login__container {
+  grid-template-columns: 34rem;
+  grid-template-areas: "header"
+                       "main";
+}
+
+@media (min-width: 768px) {
+  div.pf-v5-c-login__main-header {
+    grid-template-columns: 70% 30%;
+  }
+}
+
+/* Wordmark — realm display name text, not an image. Matches the React
+   header's plain "InvoiceForge" treatment instead of Keycloak's default
+   all-caps letter-spaced style. */
+#kc-header-wrapper {
+  font-family: var(--if-font-heading);
+  font-size: 1.375rem;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--if-text-primary) !important;
+  text-align: center;
+}
+
+/* Card panel */
+.pf-v5-c-login__main {
+  background: var(--if-surface);
+  border-radius: 1rem;
+  padding: 2.5rem 2.5rem 2rem;
+  box-shadow: 0 8px 30px rgba(18, 59, 45, 0.12);
+}
+
+#kc-page-title,
+.pf-v5-c-title {
+  font-family: var(--if-font-heading);
+  color: var(--if-text-primary);
+}
+
+/* Labels */
+.pf-v5-c-form__label-text {
+  font-family: var(--if-font-body);
+  font-weight: 500;
+  color: var(--if-text-secondary);
+}
+
+/* Inputs — the visible border lives on the wrapping span, not the <input>. */
+.pf-v5-c-form-control {
+  font-family: var(--if-font-body);
+  border: 1px solid var(--if-border);
+  border-radius: 0.5rem;
+  background: var(--if-surface);
+  box-shadow: none;
+  transition: border-color 0.15s ease;
+}
+
+.pf-v5-c-form-control:focus-within {
+  border-color: var(--if-primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(18, 59, 45, 0.15);
+}
+
+/*
+  PatternFly's own .pf-v5-c-form-control rule sets this same custom
+  property directly on this element (not just inherited from a global
+  token), so overriding the global tokens above isn't enough — a
+  directly-matching rule always wins over an inherited one, !important
+  or not, since inheritance is only consulted when nothing matches the
+  element itself. Has to be redeclared on this exact selector.
+*/
+.pf-v5-c-form-control {
+  --pf-v5-c-form-control--focus--after--BorderBottomColor: #123b2d;
+  --pf-v5-c-form-control--m-readonly--focus--after--BorderBottomColor: #123b2d;
+}
+
+.pf-v5-c-form-control input {
+  font-family: var(--if-font-body);
+  color: var(--if-text-primary);
+}
+
+/* Kill the browser's native blue focus outline on the <input> itself —
+   the ring we actually want lives on the wrapping span via :focus-within. */
+.pf-v5-c-form-control input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Password-visibility toggle — PatternFly's default is a solid dark
+   square that clashes with everything else on the form. */
+.pf-v5-c-button.pf-m-control {
+  background: transparent;
+  border: none;
+  color: var(--if-text-secondary);
+}
+
+.pf-v5-c-button.pf-m-control:hover {
+  color: var(--if-text-primary);
+}
+
+/* Primary action button — Sign In, Register, Reset password. */
+.pf-v5-c-button.pf-m-primary {
+  font-family: var(--if-font-body);
+  font-weight: 500;
+  background-color: var(--if-primary);
+  color: var(--if-on-dark);
+  border: none;
+  border-radius: 9999px;
+  padding-block: 0.65rem;
+}
+
+.pf-v5-c-button.pf-m-primary:hover,
+.pf-v5-c-button.pf-m-primary:focus {
+  background-color: var(--if-primary-hover);
+  color: var(--if-on-dark);
+}
+
+/* Secondary/link-styled buttons (e.g. "Try another way"). */
+.pf-v5-c-button.pf-m-secondary,
+.pf-v5-c-button.pf-m-link {
+  font-family: var(--if-font-body);
+  color: var(--if-primary);
+}
+
+/* Links — forgot password, back-to-login, register. */
+.pf-v5-c-login a,
+.pf-v5-c-login__main a,
+#kc-registration a,
+#kc-form-options a {
+  font-family: var(--if-font-body);
+  color: var(--if-primary);
+  text-decoration: none;
+}
+
+.pf-v5-c-login a:hover,
+.pf-v5-c-login__main a:hover,
+#kc-registration a:hover,
+#kc-form-options a:hover {
+  text-decoration: underline;
+}
+
+/* Body copy (register/reset-password helper text, alerts, etc). */
+.pf-v5-c-login__main-body,
+.pf-v5-c-form__helper-text,
+.pf-v5-c-check__label {
+  font-family: var(--if-font-body);
+  color: var(--if-text-secondary);
+}

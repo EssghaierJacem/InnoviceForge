@@ -88,4 +88,30 @@ export interface PublicExtractionResultDTO {
 export const EXTRACTION_STATUS = {
   EXTRACTED: 'EXTRACTED',
   NEEDS_REVIEW: 'NEEDS_REVIEW',
+  FAILED: 'FAILED',
 } as const
+
+/**
+ * GET /api/v1/reports/invoices?page&size (analytics-service) — mirrors
+ * PageResponse.java. page/size echo back what was requested (size is
+ * clamped server-side to 100); totalPages is already ceil'd.
+ */
+export interface Page<T> {
+  content: T[]
+  page: number
+  size: number
+  totalElements: number
+  totalPages: number
+}
+
+/**
+ * GET /api/v1/quota/status (ingestion-service). dailyLimit/remaining are
+ * -1 for PRO — see QuotaStatus.java's UNLIMITED sentinel; check
+ * `remaining < 0` rather than comparing against a specific number.
+ */
+export interface QuotaStatus {
+  plan: 'FREE' | 'PRO'
+  dailyLimit: number
+  used: number
+  remaining: number
+}

@@ -7,6 +7,8 @@ import com.invoiceforge.analytics_service.model.ProcessedEvent;
 import com.invoiceforge.analytics_service.repository.ExtractedInvoiceRepository;
 import com.invoiceforge.analytics_service.repository.ProcessedEventRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
@@ -19,6 +21,7 @@ import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class InvoiceParsedConsumer {
 
     private final ObjectMapper objectMapper;
@@ -39,8 +42,19 @@ public class InvoiceParsedConsumer {
     }
 
     private void persist(UUID eventId, InvoiceParsedMessage message) {
-        extractedInvoiceRepository.save(buildExtractedInvoice(message));
-        processedEventRepository.save(new ProcessedEvent(eventId));
+        // invoiceId is the only id this pipeline threads through every hop
+        // (upload → outbox → RabbitMQ → parsing-service → here) — putting
+        // it in MDC means every log line below, and any future one added
+        // to this method, is greppable across all three services' logs
+        // without a real distributed-tracing backend in place.
+        MDC.put("invoiceId", message.invoiceId().toString());
+        try {
+            log.info("[invoice_id={}] InvoiceParsed received, persisting as {}", message.invoiceId(), message.status());
+            extractedInvoiceRepository.save(buildExtractedInvoice(message));
+            processedEventRepository.save(new ProcessedEvent(eventId));
+        } finally {
+            MDC.remove("invoiceId");
+        }
     }
 
     private ExtractedInvoice buildExtractedInvoice(InvoiceParsedMessage message) {
