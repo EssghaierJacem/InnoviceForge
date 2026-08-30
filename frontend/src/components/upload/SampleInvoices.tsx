@@ -1,24 +1,23 @@
-import { useState } from 'react'
 import { RevealSection } from '@/components/marketing/RevealSection'
+import { SAMPLE_HANDWRITTEN_INVOICE, SAMPLE_PROFESSIONAL_INVOICE } from '@/lib/sample-data'
+import type { PublicExtractionResultDTO } from '@/types/api'
 import { cn } from '@/lib/utils'
 
 interface SampleInvoicesProps {
-  onSampleSelected: (file: File) => void
+  onSampleSelected: (result: PublicExtractionResultDTO) => void
 }
 
 const SAMPLES = [
   {
     id: 'professional',
-    src: '/samples/sample-invoice-clean.pdf',
-    filename: 'sample-invoice-professional.pdf',
+    result: SAMPLE_PROFESSIONAL_INVOICE,
     label: 'Professional invoice',
     description: 'Typed, structured format.',
     thumbnail: ProfessionalThumbnail,
   },
   {
     id: 'handwritten',
-    src: '/samples/sample-invoice-messy.pdf',
-    filename: 'sample-invoice-handwritten.pdf',
+    result: SAMPLE_HANDWRITTEN_INVOICE,
     label: 'Handwritten invoice',
     description: 'Informal, hand-written style.',
     thumbnail: HandwrittenThumbnail,
@@ -26,23 +25,6 @@ const SAMPLES = [
 ] as const
 
 export function SampleInvoices({ onSampleSelected }: SampleInvoicesProps) {
-  const [loadingId, setLoadingId] = useState<string | null>(null)
-
-  async function handleSelect(sample: (typeof SAMPLES)[number]) {
-    if (loadingId) {
-      return
-    }
-    setLoadingId(sample.id)
-    try {
-      const response = await fetch(sample.src)
-      const blob = await response.blob()
-      const file = new File([blob], sample.filename, { type: 'application/pdf' })
-      onSampleSelected(file)
-    } finally {
-      setLoadingId(null)
-    }
-  }
-
   return (
     <RevealSection className="mx-auto mt-10 max-w-3xl">
       <p className="mb-3 text-center text-sm text-text-secondary">
@@ -53,13 +35,11 @@ export function SampleInvoices({ onSampleSelected }: SampleInvoicesProps) {
           <button
             key={sample.id}
             type="button"
-            onClick={() => handleSelect(sample)}
-            disabled={loadingId !== null}
+            onClick={() => onSampleSelected(sample.result)}
             aria-label={`Try sample: ${sample.label}`}
             className={cn(
               'group flex items-center gap-4 rounded-2xl bg-primary/10 p-4 text-left',
               'transition-all duration-200 ease-out hover:-translate-y-0.5 hover:scale-[1.02] hover:shadow-lg',
-              'disabled:pointer-events-none disabled:opacity-60',
             )}
           >
             <sample.thumbnail />

@@ -75,9 +75,14 @@ services:
     environment:
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      # Local theme iteration only — picks up CSS edits on refresh instead of
+      # requiring a container restart. Not something you'd want in production.
+      KC_SPI_THEME_STATIC_MAX_AGE: "-1"
+      KC_SPI_THEME_CACHE_THEMES: "false"
     volumes:
       - keycloak_data:/opt/keycloak/data
       - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm.json
+      - ./keycloak/themes/invoiceforge:/opt/keycloak/themes/invoiceforge
     ports:
       - "${KEYCLOAK_PORT:-8181}:8080"
 
