@@ -1,0 +1,103 @@
+services:
+  postgres-ingestion:
+    ports: []
+
+  postgres-analytics:
+    ports: []
+
+  rabbitmq:
+    ports: []
+
+  redis:
+    ports: []
+
+  minio:
+    ports: []
+
+  keycloak:
+    environment:
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      KC_SPI_THEME_STATIC_MAX_AGE: "-1"
+      KC_SPI_THEME_CACHE_THEMES: "false"
+      KC_HOSTNAME: http://${AZURE_VM_IP}:8181
+
+  parsing-service:
+    build: !reset null
+    image: ghcr.io/essghaierjacem/innoviceforge-parsing-service:${IMAGE_TAG:-latest}
+    ports: []
+
+  api-gateway:
+    image: ghcr.io/essghaierjacem/innoviceforge-api-gateway:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      GATEWAY_PORT: 8080
+      KEYCLOAK_ISSUER: http://${AZURE_VM_IP}:8181/realms/invoiceforge
+      INGESTION_SERVICE_URL: http://ingestion-service:8082
+      ANALYTICS_SERVICE_URL: http://analytics-service:8083
+    ports:
+      - "8080:8080"
+    depends_on:
+      keycloak:
+        condition: service_healthy
+
+  ingestion-service:
+    image: ghcr.io/essghaierjacem/innoviceforge-ingestion-service:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      INGESTION_PORT: 8082
+      KEYCLOAK_ISSUER: http://${AZURE_VM_IP}:8181/realms/invoiceforge
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_ADMIN_CLIENT_ID: ${KEYCLOAK_ADMIN_CLIENT_ID:-backend-admin}
+      KEYCLOAK_ADMIN_CLIENT_SECRET: ${KEYCLOAK_ADMIN_CLIENT_SECRET}
+      POSTGRES_INGESTION_HOST: postgres-ingestion
+      POSTGRES_INGESTION_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:-forge}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-forge}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      MINIO_URL: http://minio:9000
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+      MINIO_BUCKET: invoices
+    depends_on:
+      postgres-ingestion:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+
+  analytics-service:
+    image: ghcr.io/essghaierjacem/innoviceforge-analytics-service:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      ANALYTICS_PORT: 8083
+      KEYCLOAK_ISSUER: http://${AZURE_VM_IP}:8181/realms/invoiceforge
+      POSTGRES_ANALYTICS_HOST: postgres-analytics
+      POSTGRES_ANALYTICS_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:-forge}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-forge}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+    depends_on:
+      postgres-analytics:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+
+  frontend:
+    image: ghcr.io/essghaierjacem/innoviceforge-frontend:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - api-gateway

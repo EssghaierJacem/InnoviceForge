@@ -1,0 +1,5 @@
+**/target/
+**/.mvn/
+src/
+*.md
+.git
