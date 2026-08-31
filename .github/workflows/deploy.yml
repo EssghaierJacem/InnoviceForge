@@ -61,6 +61,23 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
+      # deploy.yml previously only did pull+up, never re-synced the compose
+      # files themselves — any change to docker-compose.prod.yml (a new env
+      # var, a restart policy) silently never reached the VM. This keeps
+      # the VM's copy current on every deploy, same as Ansible does on a
+      # full provision.
+      - name: Sync compose files
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ vars.AZURE_VM_IP }}
+          username: invoiceforge
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "docker-compose.yml,docker-compose.prod.yml"
+          target: /opt/invoiceforge
+          overwrite: true
+
       - name: SSH deploy
         uses: appleboy/ssh-action@v1
         with:

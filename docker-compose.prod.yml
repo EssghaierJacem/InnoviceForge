@@ -25,6 +25,7 @@ services:
   parsing-service:
     build: !reset null
     image: ghcr.io/essghaierjacem/innoviceforge-parsing-service:${IMAGE_TAG:-latest}
+    restart: unless-stopped
     ports: []
 
   api-gateway:
