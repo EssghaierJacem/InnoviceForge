@@ -27,15 +27,15 @@
         state: present
         filename: docker
 
-    - name: Install Docker Engine + Compose plugin
-      apt:
-        name:
-          - docker-ce
-          - docker-ce-cli
-          - containerd.io
-          - docker-compose-plugin
-        state: present
-        update_cache: true
+    # Plain shell, not the apt module — the apt module's own cache-freshness
+    # check reported "docker-ce not available" even right after a manual
+    # `apt-get update` confirmed the repo was readable and current. Doing
+    # the update and install as one raw shell step sidesteps whatever stale
+    # state that check was using.
+    - name: Update apt cache and install Docker Engine + Compose plugin
+      shell: apt-get update && apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+      args:
+        executable: /bin/bash
 
     - name: Add admin user to docker group
       user:

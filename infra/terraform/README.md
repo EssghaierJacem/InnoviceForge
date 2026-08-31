@@ -19,9 +19,12 @@ Azure for Students subscriptions are locked to a small, account-specific set of 
 az policy assignment list --query "[?name=='sys.regionrestriction'].parameters.listOfAllowedLocations.value" -o tsv
 ```
 
-If the result doesn't include `germanywestcentral` (this repo's default, set in `variables.tf`), pick one
-from your actual list and swap it in everywhere `germanywestcentral` appears below and in
-`infra/terraform/variables.tf`'s `location` default.
+If the result doesn't include `uksouth` (this repo's default, set in `variables.tf`), pick one from your
+actual list and swap it in everywhere `uksouth` appears below and in `infra/terraform/variables.tf`'s
+`location` default. `uksouth` is the default because it's what actually worked for this subscription —
+`germanywestcentral` (also on the allowed list) had zero `Standard_B2s` capacity *and* zero quota for the
+`Dsv7` family at deploy time; if you hit the same on your list's first choice, just try another entry
+from it.
 
 ## 1. Terraform state storage account
 
@@ -29,12 +32,12 @@ Persistent state, separate from the VM itself. `invoiceforgetfstate` must be glo
 of Azure; if it's taken, pick another name and update `storage_account_name` in `versions.tf` to match.
 
 ```bash
-az group create --name invoiceforge-tfstate-rg --location germanywestcentral
+az group create --name invoiceforge-tfstate-rg --location uksouth
 
 az storage account create \
   --name invoiceforgetfstate \
   --resource-group invoiceforge-tfstate-rg \
-  --location germanywestcentral \
+  --location uksouth \
   --sku Standard_LRS \
   --allow-blob-public-access false
 
@@ -46,8 +49,11 @@ az storage container create \
 
 ## 2. SSH keypair
 
+RSA specifically — Terraform's `admin_ssh_key` argument (`azurerm` provider) rejects ed25519 keys even
+though Azure itself supports them.
+
 ```bash
-ssh-keygen -t ed25519 -f ~/.ssh/invoiceforge_vm -N ""
+ssh-keygen -t rsa -b 4096 -f ~/.ssh/invoiceforge_vm -N ""
 cat ~/.ssh/invoiceforge_vm.pub
 ```
 Keep this Cloud Shell session around (or re-generate) — you'll need both the public key (for
@@ -72,10 +78,30 @@ terraform init
 
 terraform apply \
   -var "ssh_public_key=$(cat ~/.ssh/invoiceforge_vm.pub)" \
-  -var "allowed_ssh_source_ip=<your IP>/32"
+  -var "allowed_ssh_source_ip=<your IP>/32" \
+  -parallelism=1
 ```
 
 Note the `public_ip_address` output at the end — that's the VM's IP.
+
+### If apply errors mid-way ("Provider produced inconsistent result", or "already exists")
+
+Hit this live: the azurerm provider occasionally creates a resource successfully in Azure, then the
+immediate read-back to populate Terraform state 404s (an Azure Resource Manager propagation-lag issue,
+not a config problem — `-parallelism=1` above reduces how often it happens by not racing multiple
+creates at once, but doesn't eliminate it). The error message names the resource type; the fix is:
+
+1. Just retry the same `terraform apply` — often it's transient and succeeds on the next try.
+2. If retrying says the resource "already exists" (meaning it really did get created, state just
+   doesn't know), import it directly using the ID from the error message, then re-apply:
+   ```bash
+   terraform import \
+     -var "ssh_public_key=$(cat ~/.ssh/invoiceforge_vm.pub)" \
+     -var "allowed_ssh_source_ip=<your IP>/32" \
+     <resource_address_from_the_error> <id_from_the_error>
+   ```
+3. Repeat for however many resources it happens to (it can cascade through several in one deploy) — each
+   apply makes real progress even when it errors, so you're never starting over.
 
 ## 5. Provision the VM with Ansible
 
