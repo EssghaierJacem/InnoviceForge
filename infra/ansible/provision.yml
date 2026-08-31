@@ -42,8 +42,10 @@
       file:
         path: "{{ app_dir }}/{{ item }}"
         state: directory
+        owner: "{{ ansible_user }}"
         mode: "0755"
       loop:
+        - ""
         - keycloak
         - keycloak/themes
 
@@ -74,6 +76,7 @@
       template:
         src: templates/env.j2
         dest: "{{ app_dir }}/.env"
+        owner: "{{ ansible_user }}"
         mode: "0600"
       vars:
         vm_public_ip: "{{ ansible_host }}"
