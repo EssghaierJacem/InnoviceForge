@@ -5,9 +5,9 @@ variable "location" {
 }
 
 variable "vm_size" {
-  description = "VM size. Standard_B2s (2 vCPU / 4GB RAM) is the minimum that comfortably fits this stack (4 JVMs + Keycloak + Postgres x2 + RabbitMQ + Redis + MinIO + a Python service)."
+  description = "VM size. Standard_B2s (2 vCPU / 4GB RAM) would comfortably fit this stack (4 JVMs + Keycloak + Postgres x2 + RabbitMQ + Redis + MinIO + a Python service) but had zero capacity for this subscription at deploy time — landed on Standard_D2s_v7 (2 vCPU / 8GB) instead. This default must match whatever's actually live, or a bare `terraform apply` will try to resize the running VM back down."
   type        = string
-  default     = "Standard_B2s"
+  default     = "Standard_D2s_v7"
 }
 
 variable "admin_username" {
@@ -22,6 +22,7 @@ variable "ssh_public_key" {
 }
 
 variable "allowed_ssh_source_ip" {
-  description = "Single public IP (CIDR, e.g. 203.0.113.5/32) allowed to reach port 22. Update this if your IP changes."
+  description = "CIDR allowed to reach port 22. Defaults to \"*\" (any source) because deploy.yml's GitHub Actions runners need to SSH in from unpredictable IPs — there's no fixed range to allowlist instead. Password auth is disabled (key-only), which is the real mitigation for leaving this open. Narrow it to your own IP/32 if you want tighter access for manual work, at the cost of deploy.yml's SSH step failing again."
   type        = string
+  default     = "*"
 }
