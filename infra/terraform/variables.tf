@@ -1,7 +1,7 @@
 variable "location" {
-  description = "Azure region. Limited to whatever this subscription's regionrestriction policy allows — for an Azure for Students subscription, check with: az policy assignment list --query \"[?name=='sys.regionrestriction'].parameters.listOfAllowedLocations.value\""
+  description = "Azure region. Limited to whatever this subscription's regionrestriction policy allows — for an Azure for Students subscription, check with: az policy assignment list --query \"[?name=='sys.regionrestriction'].parameters.listOfAllowedLocations.value\". uksouth is the proven-working default here: germanywestcentral had zero B-series capacity and zero Dsv7-family quota for this subscription at deploy time."
   type        = string
-  default     = "germanywestcentral"
+  default     = "uksouth"
 }
 
 variable "vm_size" {
