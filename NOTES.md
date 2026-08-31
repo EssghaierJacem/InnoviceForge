@@ -195,12 +195,17 @@ proves the whole chain including tenant isolation.
 - [ ] Frontend login flow (Vite + React + TS + react-oidc-context) —
       deferred from Phase 1
 
-## Phase 5 — Deploy (NOT STARTED)
+## Phase 5 — Deploy (SUPERSEDED — see Phase 7)
 
-- [ ] Terraform: Azure resource group, ACR, k3s VM, Postgres, blob storage
-- [ ] Helm charts per service
-- [ ] Full CD pipeline with Trivy scan + environment approval gates
-- [ ] Prometheus/Grafana, k6 load test, HTTPS, demo data
+Original plan below was k3s + Helm + ACR. Landed on something simpler instead:
+a single Azure VM running the same Docker Compose stack as local dev, behind
+Caddy for HTTPS. See Phase 7 for what actually shipped and why.
+
+- [x] ~~Terraform: Azure resource group, ACR, k3s VM, Postgres, blob storage~~ → single VM, GHCR, Docker Compose (see Phase 7)
+- [ ] ~~Helm charts per service~~ — not applicable, no k8s
+- [x] Full CD pipeline (deploy.yml) — no Trivy/approval gates, not needed at this scale
+- [ ] Prometheus/Grafana, k6 load test — not done
+- [x] HTTPS, demo data — done (Phase 7)
 
 ## Phase 6 — Visibility (ONGOING)
 
@@ -223,6 +228,59 @@ proves the whole chain including tenant isolation.
 - Verification checklist (401/202/200 + tenant isolation proof) still
   needs a clean run-through before Phase 1 is genuinely "done" — tracked
   above, not yet checked off.
+
+## 2026-08-31 — Phase 7: CI/CD + real Azure deployment, HTTPS working end to end
+
+- **CI** (`ci.yml`): three parallel jobs (Maven, npm, pytest), backend job
+  boots real Postgres/RabbitMQ/Redis/MinIO/Keycloak in Docker rather than
+  mocking, so a green run means the same thing a local `docker compose up`
+  does.
+- **CD** (`deploy.yml`): builds/pushes 5 Docker images to GHCR, then SSHes
+  into the VM to `pull && up -d`. Triggers off CI success on `main`, plus a
+  manual `workflow_dispatch` fallback.
+- **Infra**: Terraform (VM, VNet, NSG, static IP) + Ansible (Docker install,
+  compose files, secrets) — run by hand from Azure Cloud Shell, not GitHub
+  Actions, because this subscription is under a university tenant that
+  blocks the app registration GitHub's OIDC auth needs.
+- **Real bugs hit standing this up, root-caused live rather than guessed at**:
+  - Azure region/VM-size quota walls (student subscription locked to 5
+    regions, zero B-series capacity in the default one) — switched to
+    `uksouth` / `Standard_D2s_v7`.
+  - The Terraform azurerm provider's own eventual-consistency bug
+    ("Provider produced inconsistent result after apply") — resolved via
+    retry + `terraform import` of the resources that had actually been
+    created.
+  - A committed Keycloak client secret (GitGuardian caught it) — first fix
+    (rotating it) was wrong, since any hardcoded secret trips the same
+    scanner. Real fix: omit it from the realm import entirely and fetch/
+    regenerate via the Admin API instead.
+  - A Jinja operator-precedence bug (`|ternary` binding to the literal
+    `'aarch64'` instead of the whole comparison) silently broke Docker's
+    apt repo config — rendered `arch=False`, zero packages found, no
+    useful error pointing at the cause.
+  - **The actual ceiling of "bare IP over HTTP":** login/signup fundamentally
+    cannot work without HTTPS — `crypto.subtle` (needed for PKCE) requires a
+    secure context, and a public IP over plain HTTP never satisfies that in
+    any modern browser, no matter how Keycloak/CORS are configured. Fixed
+    with Caddy (reverse proxy, path-routes to Keycloak/gateway/frontend
+    under one origin) + Let's Encrypt, using `nip.io` (`<ip-with-dashes>.nip.io`)
+    as a free, real, no-registration domain that resolves straight to the
+    VM's IP.
+  - Anonymous upload quota was keying off the gateway container's internal
+    Docker IP, not the real visitor's IP — every anonymous visitor shared
+    one global bucket instead of getting their own. Not yet fixed; needs
+    the gateway to forward `X-Forwarded-For` and ingestion-service to
+    trust/read it.
+  - `analytics-service` had no explicit dependency on `ingestion-service`
+    (which owns declaring the RabbitMQ exchange), so on a fresh stack it
+    could bind its listener before the exchange existed, log "Broker not
+    available," and silently give up instead of retrying — stayed
+    "Up (healthy)" in `docker ps` while never consuming a single message.
+- **Net result:** everything above is now committed to Terraform/Ansible/
+  compose, so a fresh `terraform apply` + one `ansible-playbook` run against
+  a new resource group should reproduce this without hitting the same
+  issues again — the region/quota/provider flakiness aside, since that's
+  genuinely Azure being Azure, not something a config file fixes.
 
 ## Template for future entries
 
