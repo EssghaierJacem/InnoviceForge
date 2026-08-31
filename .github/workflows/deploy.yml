@@ -39,6 +39,13 @@ jobs:
       - name: Lowercase repository owner
         run: echo "OWNER_LC=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_ENV"
 
+      # nip.io resolves <ip-with-dashes>.nip.io straight to that IP - a
+      # free, real, publicly-resolvable hostname with no registration,
+      # which is what lets Caddy get a real Let's Encrypt cert without
+      # owning an actual domain.
+      - name: Compute nip.io domain
+        run: echo "DOMAIN=$(echo '${{ vars.AZURE_VM_IP }}' | tr '.' '-').nip.io" >> "$GITHUB_ENV"
+
       - uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -51,8 +58,8 @@ jobs:
           file: ${{ matrix.dockerfile }}
           push: true
           build-args: |
-            VITE_API_BASE_URL=http://${{ vars.AZURE_VM_IP }}:8080
-            VITE_KEYCLOAK_ISSUER=http://${{ vars.AZURE_VM_IP }}:8181/realms/invoiceforge
+            VITE_API_BASE_URL=https://${{ env.DOMAIN }}
+            VITE_KEYCLOAK_ISSUER=https://${{ env.DOMAIN }}/realms/invoiceforge
           tags: |
             ghcr.io/${{ env.OWNER_LC }}/innoviceforge-${{ matrix.service }}:${{ github.event.workflow_run.head_sha || github.sha }}
             ghcr.io/${{ env.OWNER_LC }}/innoviceforge-${{ matrix.service }}:latest
@@ -62,6 +69,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Compute nip.io domain
+        run: echo "DOMAIN=$(echo '${{ vars.AZURE_VM_IP }}' | tr '.' '-').nip.io" >> "$GITHUB_ENV"
 
       # deploy.yml previously only did pull+up, never re-synced the compose
       # files themselves — any change to docker-compose.prod.yml (a new env
@@ -74,7 +84,7 @@ jobs:
           host: ${{ vars.AZURE_VM_IP }}
           username: invoiceforge
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "docker-compose.yml,docker-compose.prod.yml"
+          source: "docker-compose.yml,docker-compose.prod.yml,Caddyfile"
           target: /opt/invoiceforge
           overwrite: true
 
@@ -87,5 +97,6 @@ jobs:
           script: |
             cd /opt/invoiceforge
             sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=${{ github.event.workflow_run.head_sha || github.sha }}/" .env
+            grep -q "^AZURE_VM_DOMAIN=" .env && sed -i "s/^AZURE_VM_DOMAIN=.*/AZURE_VM_DOMAIN=${{ env.DOMAIN }}/" .env || echo "AZURE_VM_DOMAIN=${{ env.DOMAIN }}" >> .env
             docker compose -f docker-compose.yml -f docker-compose.prod.yml pull
             docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --remove-orphans

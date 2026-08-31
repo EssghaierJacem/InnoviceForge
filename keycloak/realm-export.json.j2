@@ -430,11 +430,13 @@
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
         "http://localhost:5173/*",
-        "http://{{ vm_public_ip }}/*"
+        "http://{{ vm_public_ip }}/*",
+        "https://{{ vm_public_ip | replace('.', '-') }}.nip.io/*"
       ],
       "webOrigins": [
         "http://localhost:5173",
-        "http://{{ vm_public_ip }}"
+        "http://{{ vm_public_ip }}",
+        "https://{{ vm_public_ip | replace('.', '-') }}.nip.io"
       ],
       "notBefore": 0,
       "bearerOnly": false,

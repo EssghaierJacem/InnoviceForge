@@ -20,7 +20,13 @@ services:
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
       KC_SPI_THEME_STATIC_MAX_AGE: "-1"
       KC_SPI_THEME_CACHE_THEMES: "false"
-      KC_HOSTNAME: http://${AZURE_VM_IP}:8181
+      KC_HOSTNAME: https://${AZURE_VM_DOMAIN}
+      # Keycloak sits behind Caddy now — without this it can't tell the
+      # original request was HTTPS (Caddy's own connection to it is plain
+      # HTTP internally) and would issue http:// URLs regardless of
+      # KC_HOSTNAME.
+      KC_PROXY_HEADERS: xforwarded
+    ports: []
 
   parsing-service:
     build: !reset null
@@ -33,16 +39,13 @@ services:
     restart: unless-stopped
     environment:
       GATEWAY_PORT: 8080
-      KEYCLOAK_ISSUER: http://${AZURE_VM_IP}:8181/realms/invoiceforge
+      KEYCLOAK_ISSUER: https://${AZURE_VM_DOMAIN}/realms/invoiceforge
       INGESTION_SERVICE_URL: http://ingestion-service:8082
       ANALYTICS_SERVICE_URL: http://analytics-service:8083
-      # Also allows localhost:5173 — the origin an SSH-tunneled browser
-      # session sees, used to test the deployed stack without real TLS
-      # (secure-context APIs like PKCE's crypto.subtle require HTTPS or
-      # localhost; the bare public IP satisfies neither).
-      CORS_ALLOWED_ORIGINS: "http://${AZURE_VM_IP},http://localhost:5173"
-    ports:
-      - "8080:8080"
+      # Also keeps localhost:5173 — the origin an SSH-tunneled browser
+      # session sees, useful for testing without going through Caddy/DNS.
+      CORS_ALLOWED_ORIGINS: "https://${AZURE_VM_DOMAIN},http://localhost:5173"
+    ports: []
     depends_on:
       keycloak:
         condition: service_healthy
@@ -52,7 +55,7 @@ services:
     restart: unless-stopped
     environment:
       INGESTION_PORT: 8082
-      KEYCLOAK_ISSUER: http://${AZURE_VM_IP}:8181/realms/invoiceforge
+      KEYCLOAK_ISSUER: https://${AZURE_VM_DOMAIN}/realms/invoiceforge
       KEYCLOAK_URL: http://keycloak:8080
       KEYCLOAK_ADMIN_CLIENT_ID: ${KEYCLOAK_ADMIN_CLIENT_ID:-backend-admin}
       KEYCLOAK_ADMIN_CLIENT_SECRET: ${KEYCLOAK_ADMIN_CLIENT_SECRET}
@@ -85,7 +88,7 @@ services:
     restart: unless-stopped
     environment:
       ANALYTICS_PORT: 8083
-      KEYCLOAK_ISSUER: http://${AZURE_VM_IP}:8181/realms/invoiceforge
+      KEYCLOAK_ISSUER: https://${AZURE_VM_DOMAIN}/realms/invoiceforge
       POSTGRES_ANALYTICS_HOST: postgres-analytics
       POSTGRES_ANALYTICS_PORT: 5432
       POSTGRES_USER: ${POSTGRES_USER:-forge}
@@ -99,19 +102,39 @@ services:
         condition: service_healthy
       keycloak:
         condition: service_healthy
-      # Not just for tidiness: ingestion-service owns declaring the
-      # invoice.events exchange. Without this, analytics-service can start
-      # and bind its RabbitMQ listener before that exchange exists, hit
-      # "no exchange 'invoice.events'", and give up silently instead of
-      # retrying — it stays "Up (healthy)" in `docker ps` while never
-      # actually consuming a message.
+      # ingestion-service owns declaring the invoice.events exchange.
+      # Without this, analytics-service can start and bind its RabbitMQ
+      # listener before that exchange exists, hit "no exchange
+      # 'invoice.events'", and give up silently instead of retrying — it
+      # stays "Up (healthy)" in `docker ps` while never actually consuming
+      # a message.
       ingestion-service:
         condition: service_started
 
   frontend:
     image: ghcr.io/essghaierjacem/innoviceforge-frontend:${IMAGE_TAG:-latest}
     restart: unless-stopped
-    ports:
-      - "80:80"
+    ports: []
     depends_on:
       - api-gateway
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${AZURE_VM_DOMAIN}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - frontend
+      - api-gateway
+      - keycloak
+
+volumes:
+  caddy_data:
+  caddy_config:
