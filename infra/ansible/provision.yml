@@ -23,15 +23,10 @@
 
     - name: Add Docker apt repository
       apt_repository:
-        repo: "deb [arch={{ ansible_architecture == 'aarch64' | ternary('arm64', 'amd64') }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        repo: "deb [arch={{ (ansible_architecture == 'aarch64') | ternary('arm64', 'amd64') }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
         state: present
         filename: docker
 
-    # Plain shell, not the apt module — the apt module's own cache-freshness
-    # check reported "docker-ce not available" even right after a manual
-    # `apt-get update` confirmed the repo was readable and current. Doing
-    # the update and install as one raw shell step sidesteps whatever stale
-    # state that check was using.
     - name: Update apt cache and install Docker Engine + Compose plugin
       shell: apt-get update && apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
       args:
