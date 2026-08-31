@@ -35,6 +35,7 @@ services:
       KEYCLOAK_ISSUER: http://${AZURE_VM_IP}:8181/realms/invoiceforge
       INGESTION_SERVICE_URL: http://ingestion-service:8082
       ANALYTICS_SERVICE_URL: http://analytics-service:8083
+      CORS_ALLOWED_ORIGINS: http://${AZURE_VM_IP}
     ports:
       - "8080:8080"
     depends_on:
