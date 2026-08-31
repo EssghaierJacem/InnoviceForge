@@ -99,6 +99,14 @@ services:
         condition: service_healthy
       keycloak:
         condition: service_healthy
+      # Not just for tidiness: ingestion-service owns declaring the
+      # invoice.events exchange. Without this, analytics-service can start
+      # and bind its RabbitMQ listener before that exchange exists, hit
+      # "no exchange 'invoice.events'", and give up silently instead of
+      # retrying — it stays "Up (healthy)" in `docker ps` while never
+      # actually consuming a message.
+      ingestion-service:
+        condition: service_started
 
   frontend:
     image: ghcr.io/essghaierjacem/innoviceforge-frontend:${IMAGE_TAG:-latest}
